@@ -1,6 +1,7 @@
 package de.bitcoinclient.writer;
 
 import de.bitcoinclient.connection.ConnectionManager;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,7 +16,7 @@ public class Writer {
         this.connectionManager = connectionManager;
     }
 
-    public void insert(String table, HashMap<String, Object> values) {
+    public void insert(@NotNull String table, @NotNull HashMap<String, Object> values) {
         final int[] up = {0};
         final String[] value = {"("};
         final String[] items = {"("};
@@ -37,6 +38,7 @@ public class Writer {
 
         try {
             PreparedStatement preparedStatement = connectionManager.getConnection().prepareStatement("INSERT INTO " + table + " " + value[0]+" VALUES "+items[0]);
+            preparedStatement.closeOnCompletion();
             temp.forEach((integer, o) -> {
                 try {
                     if(o instanceof String) {
@@ -53,15 +55,18 @@ public class Writer {
                 }
             });
             preparedStatement.execute();
+            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void update(String table, String update, Object updateValue, String search, Object searchValue) {
+    public void update(@NotNull String table, @NotNull String update, @NotNull Object updateValue,
+                       @NotNull String search, @NotNull Object searchValue) {
         try {
             PreparedStatement preparedStatement =
                     connectionManager.getConnection().prepareStatement("UPDATE " + table + " SET " + update+" = ?"+" WHERE "+search+" = ?");
+            preparedStatement.closeOnCompletion();
 
             if(updateValue instanceof String) {
                 preparedStatement.setString(1, (String) updateValue);
@@ -83,9 +88,21 @@ public class Writer {
                 preparedStatement.setLong(2, (long) searchValue);
             }
             preparedStatement.execute();
+            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public void createTable(@NotNull String name, @NotNull String arguments) {
+        try {
+            PreparedStatement preparedStatement = connectionManager.getConnection().prepareStatement("create table if not exists `" + name + "` (" + arguments + ");");
+            preparedStatement.closeOnCompletion();
+            preparedStatement.execute();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
