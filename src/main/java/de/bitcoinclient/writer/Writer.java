@@ -16,7 +16,7 @@ public class Writer {
         this.connectionManager = connectionManager;
     }
 
-    public void insert(@NotNull String table, @NotNull HashMap<String, Object> values) {
+    public void insert(@NotNull String table, boolean force, @NotNull HashMap<String, Object> values) {
         final int[] up = {0};
         final String[] value = {"("};
         final String[] items = {"("};
@@ -37,7 +37,13 @@ public class Writer {
         items[0] = items[0]+")";
 
         try {
-            PreparedStatement preparedStatement = connectionManager.getConnection().prepareStatement("INSERT INTO " + table + " " + value[0]+" VALUES "+items[0]);
+            PreparedStatement preparedStatement;
+            if(force) {
+                preparedStatement = connectionManager.getConnection().prepareStatement("INSERT INTO " + table + " " + value[0]+" VALUES "+items[0]);
+            } else {
+                preparedStatement = connectionManager.getConnection().prepareStatement("INSERT INTO IF NOT EXISTS " + table + " " + value[0]+" VALUES "+items[0]);
+            }
+
             preparedStatement.closeOnCompletion();
             temp.forEach((integer, o) -> {
                 try {
