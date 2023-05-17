@@ -95,9 +95,9 @@ public class Writer {
 
     }
 
-    public void createTable(@NotNull String name, @NotNull String arguments) {
+    public void createTable(@NotNull String database, @NotNull String tableName , @NotNull String arguments) {
         try {
-            PreparedStatement preparedStatement = connectionManager.getConnection().prepareStatement("create table if not exists `" + name + "` (" + arguments + ");");
+            PreparedStatement preparedStatement = connectionManager.getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + tableName + "` (" + arguments + ") ENGINE = InnoDB;");
             preparedStatement.closeOnCompletion();
             preparedStatement.execute();
             preparedStatement.close();
