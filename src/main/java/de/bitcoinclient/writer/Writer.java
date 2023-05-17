@@ -16,7 +16,7 @@ public class Writer {
         this.connectionManager = connectionManager;
     }
 
-    public void insert(@NotNull String table, boolean force, @NotNull HashMap<String, Object> values) {
+    public void insert(@NotNull String table, @NotNull boolean force, @NotNull HashMap<String, Object> values) {
         final int[] up = {0};
         final String[] value = {"("};
         final String[] items = {"("};
